@@ -6,9 +6,9 @@ You can download the latest built APK here:
 
 [https://expo.dev/artifacts/eas/mNFN2SPdAawNsThv8mouVD.apk](https://expo.dev/artifacts/eas/mNFN2SPdAawNsThv8mouVD.apk)
 
-![login](https://toshankanwar.website/delivery/img1)
-![orders](https://toshankanwar.website/delivery/img2)
-![order model](https://toshankanwar.website/delivery/img3)
+![login](https://toshankanwar.website/delivery/img1.jpg)
+![orders](https://toshankanwar.website/delivery/img2.jpg)
+![order model](https://toshankanwar.website/delivery/img3.jpg)
 
 ---
 
