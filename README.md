@@ -256,7 +256,7 @@ This project is licensed under the MIT License.
 For questions or help, please open an issue on GitHub, or contact the maintainer via:
 
 - Website: [https://toshankanwar.website](https://toshankanwar.website)  
-- Email: toshankanwar.website
+- Email: contact@toshankanwar.website
 
 ---
 
