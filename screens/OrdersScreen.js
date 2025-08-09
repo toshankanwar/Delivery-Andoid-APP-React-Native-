@@ -16,11 +16,10 @@ import {
   RefreshControl,
   StyleSheet,
   Image,
-  Alert,
-  Keyboard,
+  Animated,
 } from 'react-native';
 import { db } from '../firebase';
-import { signOut, auth } from '../firebase';
+import { auth } from '../firebase';
 import {
   collection,
   query,
@@ -46,6 +45,10 @@ export default function OrdersScreen() {
   const typingTimeout = useRef(null);
   const [searchReady, setSearchReady] = useState(false);
 
+  // Animation refs
+  const searchAnim = useRef(new Animated.Value(0)).current;
+  const animatedValues = useRef([]);
+
   const fetchOrders = useCallback(
     async (search = '') => {
       setLoading(true);
@@ -58,8 +61,7 @@ export default function OrdersScreen() {
 
         snap.forEach((d) => {
           const o = { id: d.id, ...d.data() };
-
-          if ((o.orderStatus || '').toLowerCase() === 'delivered') return;
+          if (['delivered', 'cancelled', 'pending'].includes((o.orderStatus || '').toLowerCase())) return;
 
           const customerName =
             (o.address?.name || o.userEmail || '').toLowerCase();
@@ -78,6 +80,19 @@ export default function OrdersScreen() {
 
         const sorted = arr.sort((a, b) => b.timestamp - a.timestamp || 0);
         setOrders(sorted);
+
+        // Init and trigger staggered animations
+        animatedValues.current = sorted.map(() => new Animated.Value(0));
+        Animated.stagger(
+          100,
+          animatedValues.current.map(anim =>
+            Animated.timing(anim, {
+              toValue: 1,
+              duration: 400,
+              useNativeDriver: true,
+            })
+          )
+        ).start();
       } catch (err) {
         console.error('Error fetching orders:', err);
       }
@@ -97,10 +112,17 @@ export default function OrdersScreen() {
 
   useEffect(() => {
     fetchOrders('');
+
+    // Animate search bar entrance
+    Animated.timing(searchAnim, {
+      toValue: 1,
+      duration: 500,
+      delay: 200,
+      useNativeDriver: true,
+    }).start();
   }, [fetchOrders]);
 
   const onRefresh = () => fetchOrders(searchText);
-
   const styles = getStyles(isDark);
 
   return (
@@ -120,8 +142,23 @@ export default function OrdersScreen() {
 
       <View style={styles.divider} />
 
-      {/* Search Bar */}
-      <View style={styles.searchBox}>
+      {/* Search Bar Animation */}
+      <Animated.View
+        style={[
+          styles.searchBox,
+          {
+            opacity: searchAnim,
+            transform: [
+              {
+                translateY: searchAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [-20, 0],
+                }),
+              },
+            ],
+          },
+        ]}
+      >
         <Ionicons
           name="search"
           size={20}
@@ -146,13 +183,17 @@ export default function OrdersScreen() {
             <Ionicons name="close" size={18} color="#999" />
           </TouchableOpacity>
         )}
-      </View>
+      </Animated.View>
 
       {/* Order List */}
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         refreshControl={
-          <RefreshControl refreshing={loading} onRefresh={onRefresh} colors={['#3b82f6']} />
+          <RefreshControl
+            refreshing={loading}
+            onRefresh={onRefresh}
+            colors={['#3b82f6']}
+          />
         }
         keyboardShouldPersistTaps="handled"
       >
@@ -160,43 +201,67 @@ export default function OrdersScreen() {
           <Text style={styles.noOrdersText}>No orders for today.</Text>
         )}
 
-        {orders.map((order) => {
+        {orders.map((order, index) => {
           const customer = order.address?.name || order.userEmail || 'Unknown';
           const total = typeof order.total === 'number' ? order.total.toFixed(2) : '0.00';
           const firstItem = order.items?.[0]?.name || 'No items';
           const status = (order.paymentStatus || 'Pending').toLowerCase();
           const method = order.paymentMethod || 'Unknown';
 
+          const animVal = animatedValues.current[index] || new Animated.Value(0);
+
           return (
-            <TouchableOpacity
+            <Animated.View
               key={order.id}
-              onPress={() => setSelected(order)}
-              style={styles.card}
+              style={{
+                opacity: animVal,
+                transform: [
+                  {
+                    translateY: animVal.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [30, 0],
+                    }),
+                  },
+                  {
+                    scale: animVal.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0.95, 1],
+                    }),
+                  },
+                ],
+                marginBottom: 12,
+              }}
             >
-              <View style={styles.orderHeader}>
-                <Text style={styles.customerName}>{customer}</Text>
-                <Text style={styles.amount}>₹{total}</Text>
-              </View>
-
-              <View style={styles.subRow}>
-                <Text style={styles.firstItem}>Item: {firstItem}</Text>
-                <View style={[styles.badge, method === 'COD' ? styles.cod : styles.upi]}>
-                  <Text style={styles.badgeText}>{method}</Text>
+              <TouchableOpacity
+                onPress={() => setSelected(order)}
+                style={styles.card}
+                activeOpacity={0.85}
+              >
+                <View style={styles.orderHeader}>
+                  <Text style={styles.customerName}>{customer}</Text>
+                  <Text style={styles.amount}>₹{total}</Text>
                 </View>
-              </View>
 
-              <View style={styles.statusRow}>
-                <Text style={styles.statusLabel}>Status:</Text>
-                <Text
-                  style={[
-                    styles.statusText,
-                    status === 'confirmed' ? styles.statusConfirmed : styles.statusPending,
-                  ]}
-                >
-                  {status.charAt(0).toUpperCase() + status.slice(1)}
-                </Text>
-              </View>
-            </TouchableOpacity>
+                <View style={styles.subRow}>
+                  <Text style={styles.firstItem}>Item: {firstItem}</Text>
+                  <View style={[styles.badge, method === 'COD' ? styles.cod : styles.upi]}>
+                    <Text style={styles.badgeText}>{method}</Text>
+                  </View>
+                </View>
+
+                <View style={styles.statusRow}>
+                  <Text style={styles.statusLabel}>Status:</Text>
+                  <Text
+                    style={[
+                      styles.statusText,
+                      status === 'confirmed' ? styles.statusConfirmed : styles.statusPending,
+                    ]}
+                  >
+                    {status.charAt(0).toUpperCase() + status.slice(1)}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            </Animated.View>
           );
         })}
 
@@ -265,7 +330,6 @@ const getStyles = (isDark) =>
       backgroundColor: isDark ? '#1e293b' : '#ffffff',
       borderRadius: 16,
       padding: 16,
-      marginBottom: 12,
       elevation: 2,
       shadowColor: '#000',
       shadowOpacity: 0.05,
