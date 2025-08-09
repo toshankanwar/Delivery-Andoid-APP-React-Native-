@@ -4,7 +4,7 @@
 
 You can download the latest built APK here:
 
-[https://expo.dev/artifacts/eas/mNFN2SPdAawNsThv8mouVD.apk](https://expo.dev/artifacts/eas/mNFN2SPdAawNsThv8mouVD.apk)
+[https://expo.dev/artifacts/eas/pxCHo9wcQeTSP2csNaPGgE.apk](https://expo.dev/artifacts/eas/pxCHo9wcQeTSP2csNaPGgE.apk)
 
 ![login](https://toshankanwar.website/delivery/img1.jpg)
 ![orders](https://toshankanwar.website/delivery/img2.jpg)
@@ -129,7 +129,7 @@ After build completes, download the `.apk` file from the Expo build artifacts pa
 
 You can download the latest built APK here:
 
-[https://expo.dev/artifacts/eas/mNFN2SPdAawNsThv8mouVD.apk](https://expo.dev/artifacts/eas/mNFN2SPdAawNsThv8mouVD.apk)
+[https://expo.dev/artifacts/eas/pxCHo9wcQeTSP2csNaPGgE.apk](https://expo.dev/artifacts/eas/pxCHo9wcQeTSP2csNaPGgE.apk)
 
 ---
 
