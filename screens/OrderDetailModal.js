@@ -48,7 +48,7 @@ export default function OrderDetailModal({ order, onClose }) {
     setResult("Sending...");
     console.log("📤 Sending OTP to:", customerEmail, "for order:", orderId);
     try {
-      const res = await axios.post("https://delivery-app-otp-verifier.onrender.com/send-otp", {
+      const res = await axios.post("/send-otp", {
         orderId: orderId,
         email: customerEmail,
       });
@@ -71,7 +71,7 @@ export default function OrderDetailModal({ order, onClose }) {
     setResult("Verifying...");
     console.log("🔍 Verifying OTP for order:", orderId, "Entered OTP:", otp);
     try {
-      const res = await axios.post("https://delivery-app-otp-verifier.onrender.com/verify-otp", {    //const res = await axios.post("http://192.168.1.103:5000/verify-otp", { use computers ip address go to terminal and ipconfig
+      const res = await axios.post("/verify-otp", {    //const res = await axios.post("http://192.168.1.103:5000/verify-otp", { use computers ip address go to terminal and ipconfig
         orderId: orderId,
         otp: otp,
       });
